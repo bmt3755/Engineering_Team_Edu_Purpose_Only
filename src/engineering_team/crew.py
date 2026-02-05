@@ -1,5 +1,6 @@
-from crewai import Agent, Crew, Process, Task
+from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
+import os
 
 
 
@@ -10,11 +11,17 @@ class EngineeringTeam():
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
+    claude_llm = LLM(
+        model="anthropic/claude-sonnet-4-5-20250929",
+        api_key=os.environ.get("ANTHROPIC_API_KEY")
+    )
+
     @agent
     def engineering_lead(self) -> Agent:
         return Agent(
             config=self.agents_config['engineering_lead'],
             verbose=True,
+            llm="gpt-4o"
         )
 
     @agent
@@ -25,7 +32,8 @@ class EngineeringTeam():
             allow_code_execution=True,
             code_execution_mode="safe",  # Uses Docker for safety
             max_execution_time=500, 
-            max_retry_limit=3 
+            max_retry_limit=3, 
+            llm=self.claude_llm
         )
     
     @agent
@@ -33,6 +41,7 @@ class EngineeringTeam():
         return Agent(
             config=self.agents_config['frontend_engineer'],
             verbose=True,
+            llm=self.claude_llm
         )
     
     @agent
@@ -43,7 +52,8 @@ class EngineeringTeam():
             allow_code_execution=True,
             code_execution_mode="safe",  # Uses Docker for safety
             max_execution_time=500, 
-            max_retry_limit=3 
+            max_retry_limit=3, 
+            llm=self.claude_llm
         )
 
     @task
